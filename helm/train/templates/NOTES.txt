@@ -1,0 +1,3 @@
+TRAIN deployed as {{ include "train.fullname" . }}.
+Service:  {{ include "train.fullname" . }} (port {{ .Values.service.port }})
+Probes:    /health (readiness), /live (liveness)

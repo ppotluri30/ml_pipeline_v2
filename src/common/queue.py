@@ -1,4 +1,5 @@
 # src/common/queue.py
+import os
 import json, time
 from typing import Optional, Dict, Any
 from . import config
@@ -54,8 +55,27 @@ elif config.QUEUE_BACKEND == "kafka":
     _producer = None
     _consumers: dict[str, Consumer] = {}
 
+    # --- SASL/PLAINTEXT envs (read once) ---
+    KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL")  # e.g., SASL_PLAINTEXT
+    KAFKA_SASL_MECHANISM    = os.getenv("KAFKA_SASL_MECHANISM")     # e.g., SCRAM-SHA-256
+    KAFKA_SASL_USERNAME     = os.getenv("KAFKA_SASL_USERNAME")      # e.g., user1
+    KAFKA_SASL_PASSWORD     = os.getenv("KAFKA_SASL_PASSWORD")      # e.g., from secret
+
+    def _base_kafka_conf():
+        conf = {"bootstrap.servers": config.KAFKA_BOOTSTRAP}
+        if KAFKA_SECURITY_PROTOCOL:
+            conf["security.protocol"] = KAFKA_SECURITY_PROTOCOL
+        if KAFKA_SASL_MECHANISM:
+            conf["sasl.mechanism"] = KAFKA_SASL_MECHANISM
+        if KAFKA_SASL_USERNAME:
+            conf["sasl.username"] = KAFKA_SASL_USERNAME
+        if KAFKA_SASL_PASSWORD:
+            conf["sasl.password"] = KAFKA_SASL_PASSWORD
+        return conf
+
     def _get_admin():
-        return AdminClient({"bootstrap.servers": config.KAFKA_BOOTSTRAP})
+        # <-- USE SASL CONF HERE
+        return AdminClient(_base_kafka_conf())
 
     def ensure_topic(topic: str, num_partitions: int = 1, replication: int = 1):
         admin = _get_admin()
@@ -65,34 +85,41 @@ elif config.QUEUE_BACKEND == "kafka":
             try:
                 f.result()
             except Exception as e:
-                if any(s in str(e) for s in ("TopicAlreadyExists", "already exists")):
+                msg = str(e)
+                if 'TopicAlreadyExists' in msg or 'already exists' in msg:
                     continue
                 print(f"[kafka-admin] create topic {t} warning: {e}")
 
     def _get_producer():
+        # <-- USE SASL CONF HERE
         global _producer
         if _producer is None:
-            _producer = Producer({"bootstrap.servers": config.KAFKA_BOOTSTRAP})
+            _producer = Producer(_base_kafka_conf())
         return _producer
 
     def _get_consumer(topic: str):
         if topic not in _consumers:
-            try: ensure_topic(topic)
-            except Exception: pass
-            c = Consumer({
-                "bootstrap.servers": config.KAFKA_BOOTSTRAP,
+            try:
+                ensure_topic(topic)
+            except Exception:
+                pass
+            conf = _base_kafka_conf()  # <-- USE SASL CONF HERE
+            conf.update({
                 "group.id": config.KAFKA_GROUP,
                 "auto.offset.reset": "earliest",
                 "enable.auto.commit": True,
             })
+            c = Consumer(conf)
             c.subscribe([topic])
             _consumers[topic] = c
         return _consumers[topic]
 
     def enqueue(topic: str, msg: Dict[str, Any]) -> None:
+        try:
+            ensure_topic(topic)
+        except Exception:
+            pass
         p = _get_producer()
-        try: ensure_topic(topic)
-        except Exception: pass
         payload = json.dumps(msg).encode("utf-8")
         p.produce(topic, value=payload)
         p.poll(0)

@@ -1,0 +1,22 @@
+image:
+  repository: ghcr.io/your-org/ml-pipeline-train
+  tag: dev
+
+env:
+  SERVICE_NAME: "train"
+  NAMESPACE: "dev-eu"
+  QUEUE_BACKEND: "kafka"
+  KAFKA_BOOTSTRAP: "redpanda:9092"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  TOPIC_PRE: "preprocessed-data"
+  TOPIC_PREFIX: "eu-"
+  BUCKET_PREFIX: "eu-"
+  S3_ENDPOINT: "http://minio:9000"
+  S3_ACCESS_KEY: "minioadmin"
+  S3_SECRET_KEY: "minioadmin"
+  BUCKET_RAW: "raw"
+  BUCKET_PRE: "pre"
+  BUCKET_MODELS: "models"
+  TRAIN_MAX_RUNTIME_S: "600"
+  BUILD_SHA: "dev"
