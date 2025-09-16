@@ -17,32 +17,34 @@ spec:
         app.kubernetes.io/name: {{ include "prep.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
+        {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       imagePullSecrets:
+        {{- if .Values.imagePullSecrets }}
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+        {{- end }}
       containers:
         - name: prep
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+              name: http
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
+              {{- if kindIs "map" $v }}
+              {{ toYaml $v | nindent 14 }}
+              {{- else }}
               value: "{{ $v }}"
+              {{- end }}
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: "{{ .value }}"
+            {{- with .Values.kafkaSaslPassword }}
+            - name: KAFKA_SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key:  {{ .secretKey }}
             {{- end }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          readinessProbe:
-            httpGet: { path: /health, port: {{ .Values.service.targetPort }} }
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet: { path: /live, port: {{ .Values.service.targetPort }} }
-            initialDelaySeconds: 15
-            periodSeconds: 20

@@ -1,0 +1,13 @@
+{
+  "spec": {
+    "type": "NodePort",
+    "ports": [
+      {
+        "name": "http",
+        "port": 9090,
+        "targetPort": "http",
+        "nodePort": 30990
+      }
+    ]
+  }
+}

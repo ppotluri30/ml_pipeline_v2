@@ -3,7 +3,8 @@ import os
 import json, time
 from typing import Optional, Dict, Any
 from . import config
-
+from confluent_kafka import Producer, Consumer, KafkaException
+from confluent_kafka.admin import AdminClient, NewTopic
 # ----------------------------
 # STATUS STORE (always Redis)
 # ----------------------------
@@ -50,8 +51,7 @@ if config.QUEUE_BACKEND == "redis":
         return json.loads(raw)
 
 elif config.QUEUE_BACKEND == "kafka":
-    from confluent_kafka import Producer, Consumer, KafkaException
-    from confluent_kafka.admin import AdminClient, NewTopic
+
     _producer = None
     _consumers: dict[str, Consumer] = {}
 
