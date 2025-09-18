@@ -1,0 +1,35 @@
+﻿apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-notify-kafka-setup
+  namespace: dev
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: mc
+        image: minio/mc:latest
+        env:
+        - name: MC_HOST_local
+          valueFrom:
+            secretKeyRef:
+              name: minio
+              key: mc-host   # create once: http://ACCESS:SECRET@minio:9000
+        - name: KAFKA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kafka-auth
+              key: username
+        - name: KAFKA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-auth
+              key: password
+        command: ["/bin/sh","-lc"]
+        args:
+          - |
+            set -e
+            mc admin config set local notify_kafka:ingest   enable=on brokers=kafka.dev.svc.cluster.local:9092 topic=ingest-raw  sasl=on sasl_username=${KAFKA_USERNAME} sasl_password=${KAFKA_PASSWORD} sasl_mechanism=SCRAM-SHA-256
+            mc admin config set local notify_kafka:prepdone enable=on brokers=kafka.dev.svc.cluster.local:9092 topic=prep-done   sasl=on sasl_username=${KAFKA_USERNAME} sasl_password=${KAFKA_PASSWORD} sasl_mechanism=SCRAM-SHA-256
+            echo OK

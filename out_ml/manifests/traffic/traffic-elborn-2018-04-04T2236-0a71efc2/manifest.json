@@ -1,0 +1,50 @@
+{
+  "artifacts": {
+    "features_train": "./out_ml/feature_store/traffic/traffic-elborn-2018-04-04T2236-0a71efc2/train.parquet",
+    "features_val": "./out_ml/feature_store/traffic/traffic-elborn-2018-04-04T2236-0a71efc2/val.parquet",
+    "stats": "./out_ml/stats/traffic/traffic-elborn-2018-04-04T2236-0a71efc2/profile.json"
+  },
+  "columns": [
+    "time",
+    "down",
+    "up",
+    "rnti_count",
+    "mcs_down",
+    "mcs_down_var",
+    "mcs_up",
+    "mcs_up_var",
+    "rb_down",
+    "rb_down_var",
+    "rb_up",
+    "rb_up_var"
+  ],
+  "content_hash": "sha256:0a71efc2e4f15fb10aa27f5a79c965bfeb9157ce093d537820e7a2ef7c3c0364",
+  "created_at": "2025-09-16T23:06:50.280075+00:00",
+  "created_by": {
+    "git_sha": "",
+    "image": "prep:dev"
+  },
+  "dataset_id": "traffic-elborn-2018-04-04T2236-0a71efc2",
+  "domain": "traffic",
+  "features_added": [
+    "rb_total",
+    "down_per_rb",
+    "up_per_rb",
+    "mcs_down_std",
+    "mcs_up_std",
+    "mcs_down_cv",
+    "mcs_up_cv",
+    "hour_of_day",
+    "day_of_week"
+  ],
+  "schema": "./out_ml/schemas/traffic/v1/schema.json",
+  "slug": "elborn",
+  "source_files": [
+    "C:/Users/ppotluri/Desktop/ml_pipeline_v2/dataset/ElBorn.csv",
+    "C:/Users/ppotluri/Desktop/ml_pipeline_v2/dataset/ElBorn_test.csv"
+  ],
+  "time_window": {
+    "end": "2018-04-04 22:36:00",
+    "start": "2018-03-28 15:56:00"
+  }
+}

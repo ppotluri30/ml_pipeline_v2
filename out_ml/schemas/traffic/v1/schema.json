@@ -1,0 +1,53 @@
+{
+  "fields": [
+    {
+      "name": "time",
+      "type": "timestamp"
+    },
+    {
+      "name": "down",
+      "type": "float"
+    },
+    {
+      "name": "up",
+      "type": "float"
+    },
+    {
+      "name": "rnti_count",
+      "type": "int"
+    },
+    {
+      "name": "mcs_down",
+      "type": "float"
+    },
+    {
+      "name": "mcs_down_var",
+      "type": "float"
+    },
+    {
+      "name": "mcs_up",
+      "type": "float"
+    },
+    {
+      "name": "mcs_up_var",
+      "type": "float"
+    },
+    {
+      "name": "rb_down",
+      "type": "float"
+    },
+    {
+      "name": "rb_down_var",
+      "type": "float"
+    },
+    {
+      "name": "rb_up",
+      "type": "float"
+    },
+    {
+      "name": "rb_up_var",
+      "type": "float"
+    }
+  ],
+  "version": 1
+}
